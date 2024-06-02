@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+SPELLED_OUT = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9}
+
 def final_input():
     return """51591twosix4dhsxvgghxq
 425nine
@@ -1000,32 +1002,69 @@ five3oneonefrvnbnnlz
 gbseven9five6
 nine2hdltdjdp73phzrjnonegx
 3two3eightjszbfourkxbh5twonepr
-5cfprzgxtf3465five
-"""
+5cfprzgxtf3465five"""
 
 def test_input():
-    return """1abc2
-pqr3stu8vwx
-a1b2c3d4e5f
-treb7uchet
-"""
+    return """"""
+
+def get_number_chars(line):
+    numbers = { }
+    location = 0
+    for character in line:
+        try:
+            int(character)
+            numbers[location] = int(character)
+        except Exception:
+            pass
+        location+=1
+    return numbers
+
+def get_number_strings(line):
+    numbers = { }
+    index = 0 # keep track of which number string we're looking for
+    keys = list(SPELLED_OUT.keys())
+    start = 0 # where to start looking for any other instances of the same string
+    
+    # need to loop over the same value for instances like '12dsjfklfourds43four'
+    # [where there's multiple instance of the same number string]
+    while(index < len(SPELLED_OUT)):
+        spelled_out = keys[index]
+        spelled_out_start = line.find(spelled_out, start)
+        if(spelled_out_start >= 0):
+            numbers[spelled_out_start] = SPELLED_OUT[spelled_out]
+            start = spelled_out_start+1
+        else:
+            index+=1
+            start = 0
+    return numbers
 
 def parse(document):
     sum = 0
     lines = document.split("\n")
     for line in lines:
-        first_number = None
-        second_number = None
-        for character in line:
-            try:
-                int(character)
-                if(first_number is None):
-                    first_number = character
-                    second_number = character
-                else:
-                    second_number = character
-            except Exception:
-                pass
+        
+        # any instance will set both the first number and second number standard
+        first_number = 2048
+        second_number = -1
+        
+        numbers = get_number_chars(line)
+        numbers.update(get_number_strings(line))
+
+        # step through the dictionary and find the lowest and highest locations
+        for num in numbers:
+            if(num < first_number):
+                first_number = num
+            if(num > second_number):
+                second_number = num
+
+        # Copy both instances if there wasn't a second number
+        if(second_number == -1):
+            second_number = first_number
+
+        # set the value for the first and second numbers from the dictonary
+        first_number = numbers[first_number]
+        second_number = numbers[second_number]
+
         value = f"{str(first_number)}{str(second_number)}"
         if(first_number is not None):
             sum += int(value)
