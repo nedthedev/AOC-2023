@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+# dictionary mappings for spelled out numbers
 SPELLED_OUT = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9}
 
 def final_input():
@@ -1011,6 +1012,7 @@ def get_number_chars(line):
     numbers = { }
     location = 0
     for character in line:
+        # try to convert the character to a number. if it works, then add it
         try:
             int(character)
             numbers[location] = int(character)
