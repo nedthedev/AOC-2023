@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-import re
-
 def final_data():
     return """Game 1: 2 blue, 3 red; 3 green, 3 blue, 6 red; 4 blue, 6 red; 2 green, 2 blue, 9 red; 2 red, 4 blue
 Game 2: 4 red, 1 green; 3 red; 13 green, 5 red, 3 blue; 3 green, 2 red; 3 blue, 5 red, 3 green; 2 red, 3 blue, 12 green
@@ -105,7 +103,11 @@ Game 99: 1 green, 2 red, 1 blue; 8 green, 4 blue, 1 red; 7 blue, 1 red, 11 green
 Game 100: 7 blue, 9 green, 2 red; 5 red, 9 green; 1 blue, 8 red, 13 green"""
 
 def test_data():
-    return """Game 59: 7 blue, 6 green, 5 red; 7 red, 2 blue; 5 red, 11 green, 14 blue; 8 green, 17 red"""
+    return """Game 59: 7 blue, 6 green, 5 red; 7 red, 2 blue; 5 red, 11 green, 14 blue; 8 green, 17 red
+Game 60: 3 green, 8 blue, 2 red; 4 green, 7 blue, 6 red; 13 blue, 8 green, 2 red; 10 red, 6 blue, 5 green; 11 green, 3 blue, 4 red; 9 red, 5 green, 9 blue
+Game 61: 4 red, 18 blue, 13 green; 9 green, 5 red, 3 blue; 4 green, 3 blue, 4 red; 8 red, 4 green, 7 blue; 8 red, 4 blue, 6 green; 10 green, 5 red, 14 blue
+Game 62: 12 red, 14 blue, 9 green; 9 blue, 6 red, 4 green; 2 red, 5 blue; 1 red, 12 blue
+Game 63: 11 blue, 13 red, 11 green; 4 blue, 9 green; 8 blue, 9 red; 7 red, 11 green, 7 blue"""
 
 class Game:
     MAXIMUMS = {'red': 12, 'green': 13, 'blue': 14}
@@ -114,7 +116,11 @@ class Game:
         self.game_number = None
         self.rounds = []
         self.is_valid = True
+        self.min_red = 0
+        self.min_green = 0
+        self.min_blue = 0
 
+    # parse the game data for future usage
     def parse_game_data(self):
         game_data = self.game.split(": ")
         self.game_number = int(game_data[0].split(" ")[1])
@@ -124,11 +130,13 @@ class Game:
             self.rounds.append(game.split(", "))
         self.is_valid = self.determine_maxs()
 
+    # check if the number of the given colored cube exceeds possibility
     def is_possible(self, num, color):
         if(num > int(self.MAXIMUMS[color])):
             return False
         return True
 
+    # step through the game data and get the number of cubes pulled and check if possible
     def determine_maxs(self):
         for round in self.rounds:
             for round_data in round:
@@ -137,15 +145,41 @@ class Game:
                     if(not self.is_possible(int(split[0]), split[1])):
                         return False
         return True
+    
+    # check the 'x color' string and update the minimum values for the class
+    def set_minimum(self, num, color):
+        if(color[0] == 'r'):
+            if(self.min_red < num):
+                self.min_red = num
+        elif(color[0] == 'g'):
+            if(self.min_green < num):
+                self.min_green = num
+        else:
+            if(self.min_blue < num):
+                self.min_blue = num 
+
+    # determine the minimum number of each color of cube required
+    def set_minimums(self):
+        for round in self.rounds:
+            for round_data in round:
+                split = round_data.split(' ')
+                self.set_minimum(int(split[0]), split[1])
 
 if __name__ == "__main__":
     sum = 0
     for data in (final_data().split("\n")):
         game = Game(data)
         game.parse_game_data()
+        
+        # only needed for part one
         if(game.is_valid):
             sum += game.game_number
             print(f"Game {game.game_number} is possible")
         else:
             print(f"Game {game.game_number} is impossible")
+
+        # only needed for part two
+        game.set_minimums()
+        sum += (game.min_red * game.min_green * game.min_blue)
+
     print(sum)
