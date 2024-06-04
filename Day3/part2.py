@@ -174,16 +174,16 @@ class SpecialCharacter:
         self.x = x
         self.y = y
         self.parts_around = []
+        self.value = 0
 
     def find_numbers_around(self, grid, max_x, max_y):
         for y in range(self.y-1, self.y+2):
             for x in range(self.x-1, self.x+2):
                 if(x >= 0 and x < max_x and y >= 0 and y <= max_y):
                     if(re.search('\\d', grid[y][x])):
-                       print("sdjfl3")
                        self.parts_around.append(self.recurse_digits(x, y, grid))
-        if(self.parts_around.length == 2):
-            return
+        if(len(self.parts_around) == 2):
+            self.value = self.parts_around[0] * self.parts_around[1]
         else:
             self.parts_around = []
 
@@ -217,19 +217,17 @@ class SpecialCharacter:
 
 if __name__ == "__main__":
 
-    grid = list(test_input())
+    grid = list(final_input())
     specials = []
     for y, line in enumerate(grid):
         for x, char in enumerate(line):
-            if(re.search('[@#$%&*/+=-]', char)):
-                print("FDJSLFJ")
+            if(re.search('[*]', char)):
                 specials.append(SpecialCharacter(x, y))
 
     sum = 0
     for special in specials:
         special.find_numbers_around(grid, len(grid[0]), len(grid))
-        for number in special.parts_around:
-            sum += int(number)
+        sum += special.value 
 
     print(sum)
             
