@@ -100,14 +100,14 @@ Game 96: 1 blue, 13 green; 8 blue, 3 red, 4 green; 1 red, 3 blue, 10 green
 Game 97: 18 green, 4 red; 1 blue, 2 red, 9 green; 6 red, 3 blue, 10 green; 3 blue, 15 green, 4 red
 Game 98: 2 blue, 3 green, 6 red; 1 green, 1 blue, 8 red; 8 red, 3 green, 1 blue; 2 blue; 8 red, 2 green, 2 blue
 Game 99: 1 green, 2 red, 1 blue; 8 green, 4 blue, 1 red; 7 blue, 1 red, 11 green; 9 green, 3 blue; 1 red, 2 blue; 1 red, 6 blue
-Game 100: 7 blue, 9 green, 2 red; 5 red, 9 green; 1 blue, 8 red, 13 green"""
+Game 100: 7 blue, 9 green, 2 red; 5 red, 9 green; 1 blue, 8 red, 13 green""".split("\n")
 
 def test_data():
     return """Game 59: 7 blue, 6 green, 5 red; 7 red, 2 blue; 5 red, 11 green, 14 blue; 8 green, 17 red
 Game 60: 3 green, 8 blue, 2 red; 4 green, 7 blue, 6 red; 13 blue, 8 green, 2 red; 10 red, 6 blue, 5 green; 11 green, 3 blue, 4 red; 9 red, 5 green, 9 blue
 Game 61: 4 red, 18 blue, 13 green; 9 green, 5 red, 3 blue; 4 green, 3 blue, 4 red; 8 red, 4 green, 7 blue; 8 red, 4 blue, 6 green; 10 green, 5 red, 14 blue
 Game 62: 12 red, 14 blue, 9 green; 9 blue, 6 red, 4 green; 2 red, 5 blue; 1 red, 12 blue
-Game 63: 11 blue, 13 red, 11 green; 4 blue, 9 green; 8 blue, 9 red; 7 red, 11 green, 7 blue"""
+Game 63: 11 blue, 13 red, 11 green; 4 blue, 9 green; 8 blue, 9 red; 7 red, 11 green, 7 blue""".split("\n")
 
 class Game:
     MAXIMUMS = {'red': 12, 'green': 13, 'blue': 14}
@@ -165,21 +165,24 @@ class Game:
                 split = round_data.split(' ')
                 self.set_minimum(int(split[0]), split[1])
 
-if __name__ == "__main__":
+def main(games_data):
     sum = 0
-    for data in (final_data().split("\n")):
+    for data in games_data:
         game = Game(data)
         game.parse_game_data()
         
         # only needed for part one
-        if(game.is_valid):
-            sum += game.game_number
-            print(f"Game {game.game_number} is possible")
-        else:
-            print(f"Game {game.game_number} is impossible")
+        # if(game.is_valid):
+        #     sum += game.game_number
+        #     print(f"Game {game.game_number} is possible")
+        # else:
+        #     print(f"Game {game.game_number} is impossible")
 
         # only needed for part two
         game.set_minimums()
         sum += (game.min_red * game.min_green * game.min_blue)
 
-    print(sum)
+    return sum
+
+if __name__ == "__main__":
+    print(main(final_data()))

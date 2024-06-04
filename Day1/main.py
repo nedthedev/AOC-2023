@@ -1003,10 +1003,10 @@ five3oneonefrvnbnnlz
 gbseven9five6
 nine2hdltdjdp73phzrjnonegx
 3two3eightjszbfourkxbh5twonepr
-5cfprzgxtf3465five"""
+5cfprzgxtf3465five""".split("\n")
 
 def test_input():
-    return """"""
+    return """""".split("\n")
 
 def get_number_chars(line):
     numbers = { }
@@ -1040,9 +1040,8 @@ def get_number_strings(line):
             start = 0
     return numbers
 
-def parse(document):
+def parse(lines):
     sum = 0
-    lines = document.split("\n")
     for line in lines:
         
         # any instance will set both the first number and second number standard
@@ -1074,5 +1073,4 @@ def parse(document):
 
 if __name__ == "__main__":
     # document = input("Enter document to parse: ")
-    sum = parse(final_input())
-    print(sum)
+    print(parse(final_input()))
