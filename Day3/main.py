@@ -149,11 +149,11 @@ def test_input():
 ...*......
 ..35..633.
 ......#...
-617/......
+617*......
 .....+.58.
 ..592.....
 ......755.
-...-.=....
+...$.*....
 .664.598..""".split("\n")
 
 """
@@ -161,11 +161,11 @@ def test_input():
 ...*......
 ..35..633.
 ......#...
-617/......
+617*......
 .....+.58.
 ..592.....
 ......755.
-...-.=....
+...$.*....
 .664.598..
 """
 
@@ -210,20 +210,33 @@ class SpecialCharacter:
             return self.recurse_right(x+1, y, digit, grid)
         return digit
 
-if __name__ == "__main__":
+def part2_logic(specials):
+    sum = 0
+    for special in specials:
+        special.find_numbers_around(grid, len(grid[0]), len(grid))
+        if(len(special.parts_around) == 2):
+            sum += special.parts_around[0] * special.parts_around[1]
+    return sum
 
-    grid = list(final_input())
-    specials = []
-    for y, line in enumerate(grid):
-        for x, char in enumerate(line):
-            if(re.search('[@#$%&*/+=-]', char)):
-                specials.append(SpecialCharacter(x, y))
-
+def part1_logic(specials):
     sum = 0
     for special in specials:
         special.find_numbers_around(grid, len(grid[0]), len(grid))
         for number in special.parts_around:
             sum += int(number)
+    return sum
 
-    print(sum)
+if __name__ == "__main__":
+
+    part1_chars = "@#$%&*/+=-"
+    part2_chars = "*"
+
+    grid = list(final_input())
+    specials = []
+    for y, line in enumerate(grid):
+        for x, char in enumerate(line):
+            if(re.search(f'[{part1_chars}]', char)):
+                specials.append(SpecialCharacter(x, y))
+
+    print(part2_logic(specials))
             
