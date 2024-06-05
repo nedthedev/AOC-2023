@@ -225,8 +225,25 @@ def split_nth(data, n):
         split_array.append(data[i:i+n].strip())
     return split_array
 
-def main(games):
+def make_copies(games):
+    for game in games:
+        for copy in game.to_copy:
+            # print(f"Making copy of {copy}")
+            games[copy].make_copy(game.copies)
+
+
+class Card:
+    def __init__(self, value, to_copy):
+        self.value = value
+        self.to_copy = to_copy
+        self.copies = 1
+    
+    def make_copy(self, factor):
+        self.copies += (1*factor)
+
+def part1(games):
     sum = 0
+    
     for game in games:
         game_sum = 0
 
@@ -244,5 +261,37 @@ def main(games):
         sum += game_sum
     return sum
 
+def part2(games):
+    sum = 0
+
+    all_games = []
+    
+    for game_number, game in enumerate(games):
+        game_sum = 0
+
+        # separate the cards
+        game = game.split(" | ")
+
+        # split every 3rd space
+        yours = split_nth(game[1], 3)
+        winner = split_nth(game[0].split(": ")[1], 3)
+        
+        matches = 0
+        copies = []
+        for number in winner:
+            if number in yours:
+                matches += 1
+                if(game_sum == 0): game_sum = 1
+                else: game_sum *= 2
+                copies.append(game_number + matches)
+        all_games.append(Card(game_sum, copies))
+    
+    make_copies(all_games)
+    
+    sum = 0
+    for game in all_games:
+        sum += game.copies 
+    return sum
+
 if __name__ == "__main__":
-    print(main(final_data()))
+    print(part2(final_data()))
