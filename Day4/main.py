@@ -218,6 +218,15 @@ Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
 Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
 Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11""".split("\n")
 
+class Card:
+    def __init__(self, value, to_copy):
+        self.value = value
+        self.to_copy = to_copy
+        self.copies = 1
+    
+    def make_copy(self, factor):
+        self.copies += (1*factor)
+
 def split_nth(data, n):
     split_array = []
     # step every nth character and add it to the split array, stripping white space
@@ -228,18 +237,7 @@ def split_nth(data, n):
 def make_copies(games):
     for game in games:
         for copy in game.to_copy:
-            # print(f"Making copy of {copy}")
             games[copy].make_copy(game.copies)
-
-
-class Card:
-    def __init__(self, value, to_copy):
-        self.value = value
-        self.to_copy = to_copy
-        self.copies = 1
-    
-    def make_copy(self, factor):
-        self.copies += (1*factor)
 
 def part1(games):
     sum = 0
