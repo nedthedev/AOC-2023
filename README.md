@@ -1,4 +1,4 @@
-# AOC-2023-Python
+# AOC-2023
 2023 Advent of Code Challeges in a variety of languages.
 
 ## About
