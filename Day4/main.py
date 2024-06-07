@@ -292,4 +292,5 @@ def part2(games):
     return sum
 
 if __name__ == "__main__":
+    x = 261119210191063
     print(part2(final_data()))

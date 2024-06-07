@@ -1,20 +1,23 @@
 package Day6;
 
+import java.math.BigInteger;
+
 public class Race {
 
-    private int record;
-    private int duration;
+    private BigInteger record;
+    private BigInteger duration;
     private int waysToWin;
 
-    public Race(int duration, int record) {
+    public Race(BigInteger duration, BigInteger record) {
         this.record = record;
         this.duration = duration;
         this.waysToWin = 0;
     }
 
     public void runVariations() {
-        for(int speed = 1; speed < this.duration; speed++) {
-            if(speed * (duration-speed) > this.record) {
+        for (BigInteger speed = BigInteger.valueOf(0); speed.compareTo(this.duration) <= 0;
+             speed = speed.add(BigInteger.ONE)) {
+            if(speed.multiply(this.duration.subtract(speed)).compareTo(this.record) > 0) {
                 this.incrementWaysToWin();
             }
         }
@@ -24,11 +27,11 @@ public class Race {
         this.waysToWin++;
     }
 
-    public int getRecord() {
+    public BigInteger getRecord() {
         return this.record;
     }
 
-    public int getTime() {
+    public BigInteger getTime() {
         return this.duration;
     }
 
