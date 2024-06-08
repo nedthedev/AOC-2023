@@ -1010,7 +1010,7 @@ KTJJT 220
 QQQJA 483""".split("\n")
 
 RANKS = {
-    "1": 1,
+    "J": 1,
     "2": 2,
     "3": 3,
     "4": 4,
@@ -1020,7 +1020,6 @@ RANKS = {
     "8": 8,
     "9": 9,
     "T": 10,
-    "J": 11,
     "Q": 12,
     "K": 13,
     "A": 14
@@ -1032,6 +1031,7 @@ class Hand:
     bet = 0
     cards = []
     matches = []
+    wilds = 0
 
     def __lt__(self, hand):
         for index in range(len(self.hand)):
@@ -1066,7 +1066,9 @@ class Hand:
         compared = []
         local_copy = self.hand
         for index, card in enumerate(local_copy):
-            if(card not in compared):
+            if(card == "J"):
+                self.wilds += 1
+            elif(card not in compared):
                 matches = 1
                 for comparison in local_copy[index+1:]:
                     if(card == comparison):
@@ -1074,11 +1076,15 @@ class Hand:
                 card_matches.append(matches)
                 compared.append(card)
         card_matches.sort(reverse=True)
+        try:
+            card_matches[0] += self.wilds
+        except:
+            card_matches = [self.wilds]
         self.matches = card_matches
 
 def print_hands(hands):
     for hand in hands:
-        print(f"{hand.hand}")
+        print(f"{hand.hand} {hand.matches}")
     print("\n")
 
 def calculate_return(hands):
@@ -1108,5 +1114,7 @@ if __name__ == "__main__":
                 hands[unsorted+sorted+1] = hand
                 hands[sorted] = new_strongest
                 hand = new_strongest
+
+    print_hands(hands)
 
     print(calculate_return(hands))
