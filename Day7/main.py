@@ -1040,11 +1040,13 @@ class Hand:
             elif(RANKS[self.hand[index]] < RANKS[hand.hand[index]]):
                 return True
         return True
+    
     def __eq__(self, hand):
         for index in range(len(self.hand)):
             if(RANKS[self.hand[index]] != RANKS[hand.hand[index]]):
                 return False
         return True
+    
     def __gt__(self, hand):
         for index in range(len(self.hand)):
             if(RANKS[self.hand[index]] < RANKS[hand.hand[index]]):
@@ -1052,7 +1054,6 @@ class Hand:
             elif(RANKS[self.hand[index]] > RANKS[hand.hand[index]]):
                 return True
         return True
-    
 
     def __init__(self, hand, bet):
         self.hand = hand
@@ -1093,14 +1094,33 @@ def calculate_return(hands):
         answer += (hand.bet * (count+1))
     return answer
 
-if __name__ == "__main__":
+"""
+new_strongest = other_hand 
+hands[unsorted+sorted+1] = hand
+hands[sorted] = new_strongest
+hand = new_strongest
+"""
+
+# def swap(index1, index2, hands):
+#     print(f"Swapping {hands[index1].hand} with {hands[index2].hand}")
+#     print_hands(hands)
+#     new_strongest = hands[index1]
+#     hands[index1] = hands[index2]
+#     hands[index2] = new_strongest
+#     print_hands(hands)
+#     return hands
+
+def format_data(data):
     hands = []
-    for line in FINAL_INPUT:
+    for line in data:
         line = line.split(" ")
         hands.append(Hand(line[0], int(line[1])))
         hands[-1].find_matches()
+    return hands
 
-    hands = sorted(hands, key=lambda x:x.len(), reverse=False)
+if __name__ == "__main__":
+    hands = sorted(format_data(FINAL_INPUT), key=lambda x:x.len(), reverse=False)
+
     for sorted, hand in enumerate(hands):
         for unsorted, other_hand in enumerate(hands[sorted+1:]):
             if(len(hand.matches) == len(other_hand.matches) and hand.matches[0] == other_hand.matches[0]):
@@ -1108,8 +1128,8 @@ if __name__ == "__main__":
                     new_strongest = other_hand 
                     hands[unsorted+sorted+1] = hand
                     hands[sorted] = new_strongest
-                    hand = new_strongest         
-            elif (other_hand.matches[0] > hand.matches[0]):
+                    hand = new_strongest
+            elif(other_hand.matches[0] > hand.matches[0]):
                 new_strongest = other_hand 
                 hands[unsorted+sorted+1] = hand
                 hands[sorted] = new_strongest
