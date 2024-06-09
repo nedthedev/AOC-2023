@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from ast import literal_eval as make_tuple
+# from ast import literal_eval as make_tuple
+# import time
 
 FINAL_INPUT = """LLLLRLRLRRLRRRLRRLRLRRLRLLRRRLRRLRRRLRLLLRLRRLRLLRRRLRRLRLRRLLRRRLRRRLRLRRLRRRLRRLRRLLRRRLLLLRRLRRLRRLRRRLLLRLRLRLRRLRRRLRLRRRLRLRRRLRRLRRLLRRLLRLRRRLRLRRRLLLRLRRRLRLRRRLRRLRLRRLRRRLRRRLRRLLLRRRLRRLRRLRRLRRRLLLRRLRLRRRLLLLRRRLRRLRRRLLRLRLRRLLRRRLLRLRLRLRRLRRLRRRLRRLLRLRRLRRLLLLRRLRLRRLLRRLLRRLRRLRRRLLLRRRR
 
@@ -710,15 +711,16 @@ JNL = (XKL, JBQ)
 BVM = (KHF, FTD)
 XPK = (SQN, MLN)
 GJN = (MLR, XHT)""".split("\n")
-TEST_INPUT = """RL
+TEST_INPUT = """LR
 
-AAA = (BBB, CCC)
-BBB = (DDD, EEE)
-CCC = (ZZZ, GGG)
-DDD = (DDD, DDD)
-EEE = (EEE, EEE)
-GGG = (GGG, GGG)
-ZZZ = (ZZZ, ZZZ)""".split("\n")
+11A = (11B, XXX)
+11B = (XXX, 11Z)
+11Z = (11B, XXX)
+22A = (22B, XXX)
+22B = (22C, 22C)
+22C = (22Z, 22Z)
+22Z = (22B, 22B)
+XXX = (XXX, XXX)""".split("\n")
 
 STEP = {
     "L": 0,
@@ -733,10 +735,9 @@ def parse_data(data):
     return parsed_data
 
 def go_next(data, dir, location):
-    # print(f"Data: {data}, Dir: {dir}, Location: {location}")
     return data[location][STEP[dir]]
 
-def navigate(data, pattern, location, steps_taken):
+def navigate(data, pattern, location, steps_taken=0):
     return go_next(data, pattern[steps_taken%len(pattern)], location)
 
     # Maximum recursion reached
@@ -752,12 +753,32 @@ if __name__ == "__main__":
     data = FINAL_INPUT
     instructions = data[0]
     directions = parse_data(data[2:])
-    
-    location = "AAA"
     steps_taken = 0
-    while True:
-        location = navigate(directions, instructions, location, steps_taken)
-        steps_taken += 1
-        if(location == "ZZZ"):
-            print(steps_taken)
-            break
+
+    # PART 1
+    # location = "AAA"
+    # while True:
+    #     location = navigate(directions, instructions, location, steps_taken)
+    #     steps_taken += 1
+    #     if(location == "ZZZ"):
+    #         print(steps_taken)
+    #         break
+
+    # PART 2
+    starting_locations = []
+    for location in directions:
+        if(location[-1] == "A"): 
+            starting_locations.append({"location": location})
+
+    for location_index, location in enumerate(starting_locations):
+        location_copy = location["location"]
+        steps_taken = 0
+        while True:
+            location_copy = navigate(directions, instructions, location_copy, steps_taken)
+            steps_taken += 1
+            if(location_copy[-1] == "Z"):
+                print(f"{starting_locations[location_index]['location']} took {steps_taken} steps!")
+                break
+
+    # Calculate LCM for each of the starting points, that'll be the point that all would end at the same time
+    # (Learned quickly that it wasn't going to be solved anytime soon on my computer hehe)
