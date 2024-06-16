@@ -1,12 +1,10 @@
-#!/usr/bin/node
+#!/usr/bin/python
 
-const TEST_INPUT = `-L|F7
-7S-7|
-L|7||
--L-J|
-L|-JF`.split("\n");
+import time
+from enum import Enum
 
-const FINAL_INPUT = `77.FFFF|-77FFL-F-7--F7.|-7.F|7FFF|-FL7-777F.L-FL7.L7--7.|.7-.J-7-J.F-L77F-7-L7F-F.F7-FL-|--7--JF|7.-7FFL7F-F7-F.FF|-F7LF-FLJFLF-J.F7F--F77..
+def final_input():
+    return """77.FFFF|-77FFL-F-7--F7.|-7.F|7FFF|-FL7-777F.L-FL7.L7--7.|.7-.J-7-J.F-L77F-7-L7F-F.F7-FL-|--7--JF|7.-7FFL7F-F7-F.FF|-F7LF-FLJFLF-J.F7F--F77..
 |-L7--|.FLJJL|FF7L|FF|-F.LJFLFLJ|L.LL-7L7J|L7.FJL||L7J|-|-777|.LF77|J|.F|L|..J|FL7L--7J.JL|7-|7F||F-FLJ|-F7|J||FF-7LLJ7J-JJ|-LJF.7-F|LF7|L7F
 L7L|J-|F-77|F|J||.L|7JL|-7F-.|J.|-J77-7||J7LJ7|..L-L-7L7--|-F-J-L7J||F-|J.7-F.|77LF-JJ|FF|FLJLJLFJ7-|7FL---|LL|FJ-J7.|FF-7F|FJ-J-J.L|-|L7F7J
 |7.J7FL-.||-F---J-LFJFF|.-LJ-J7FJF||||L|J.F..||F|L7JFF-7LF7||7|7||L-7LLL--J|LJ|LL.|7-LL-J-7..7JJF.7.7F7J-L.JJF|77..777LJ-7FF7F-JF7..|JF.F-L7
@@ -145,33 +143,184 @@ L7|LJ.FFJ|..|-J|L7LJ-LL-|-.FF-7F-J.F--JLL--7FL7FJ-F|FJL7|LJJLJ7|-LL-JJ|L7|JFLJJ|
 J..7-L7.---FJJJL7F--|7.LJ7F7||.F77-L7-L-7FF-|J77|7FLJJ7|F..|F--7|LJ-JJ7L7JF-J-F7L||.||-7-||JLLL7JF.|.|FLLJ.JJL|JJFL-7JF777|JJFJ.LLF7|L7J-FJ|
 LF7.||||.|7..L||J|7FJ|.|JFL.LJFFFJ7JJ.L|L-L-J-F7J7F|F7-7|FF-|-|-7||.J.FJ|LJ.FLJJ|||-LJ.L7LJ-.L-LF7-FLJ7JLF7.|.||-F.7L-FJF7LL--77..F-F7||.L-.
 .L.L-F|F|||FFFLJ.L-7JF-|--J7.7--J--J7--7FF7LFJLJ-F--||LJJJL||FL-FJL7|.7FL.|FL.F--||J.JFF7-JJF|7.|JF-7--7J||LF-F-7.JJFJ|.777..|.7JJJ.7LFL-|77
-7JL|--JLL7.F-JJ.--|L--.|7-J.-JJJ.F---7-F-JL.J.L|-J-LJL-J-JLJ7..L|..L7-LL|----7J.LLJJ-LL-|.LFL7----J-LJL-FL-L-J|JJF-F|LJ7-JLLLJ-L.|JLJ.L|-LL.`.split("\n");
+7JL|--JLL7.F-JJ.--|L--.|7-J.-JJJ.F---7-F-JL.J.L|-J-LJL-J-JLJ7..L|..L7-LL|----7J.LLJJ-LL-|.LFL7----J-LJL-FL-L-J|JJF-F|LJ7-JLLLJ-L.|JLJ.L|-LL.""".split("\n")
 
-// FUNCTION
-function parseData(data) {
-    return data;
-}
+def test_input():
+    return """..F7.
+.FJ|.
+SJ.L7
+|F--J
+LJ...""".split("\n")
 
-function getStart(data) {
-    let x, y = 0;
-    for(y; y < data.length; y++) {
-        for(x = 0; x < data[y].length; x++) {
-            if(data[y].charAt(x) == 'S') {
-                return x;
-            }
-        }
-    }
-    return null;
-}
+class DIR(Enum):
+    NORTH = 0
+    EAST = 1
+    SOUTH = 2
+    WEST = 3
 
-function navigate(data, startX, startY) {
+class Map:
+    def __init__(self, map):
+        self.map = self.generate_cells(map)
+        self.start = self.find_start()
+        self.create_links()
 
-}
+    def generate_cells(self, map):
+        formatted = []
+        for row_num, row in enumerate(map):
+            formatted.append([])
+            for symbol in row:
+                formatted[row_num].append(Cell(symbol))
+        return formatted
+    
+    def create_links(self):
+        for row, cells in enumerate(self.map):
+            north = east = south = west = None
 
-function takeStep(currentX, currentY, lastX, lastY) {
+            for col, cell in enumerate(cells):
+                north = None
+                east = None
+                south = None
+                west = None
+                try:
+                    if(cell.can_north):
+                        north = self.map[row-1][col]
+                        if(north.symbol not in "|7F"):
+                            north = None
+                except:
+                    pass
+                try:
+                    if(cell.can_east):
+                        east = self.map[row][col+1]
+                        if(east.symbol not in "J7-"):
+                            east = None
+                except:
+                    pass
+                try:
+                    if(cell.can_south):
+                        south = self.map[row+1][col]
+                        if(south.symbol not in "|LJ"):
+                            south = None
+                except:
+                    pass
+                try:
+                    if(cell.can_west):
+                        west = self.map[row][col-1]
+                        if(west.symbol not in "LF-"):
+                            west = None
+                except:
+                    pass
+                cell.neighbors = [north, east, south, west]
 
-}
+    def find_start(self):
+        for row in self.map:
+            for cell in row:
+                if(cell.symbol == "S"):
+                    cell.can_north = True
+                    cell.can_east = True
+                    cell.can_south = True
+                    cell.can_west = True
+                    return cell
+            
+    def print(self):
+        for row in self.map:
+            rowstr = ""
+            for cell in row:
+                if(cell.traversed):
+                    # rowstr += str(cell.steps)
+                    rowstr += "x"
+                else:
+                    rowstr += cell.symbol
+            print(f"{rowstr}")
+        print("\n") 
 
-// MAIN BLOCK
-let data = parseData(TEST_INPUT);
-console.log(getStart(data));
+class Cell:
+    def __init__(self, symbol):
+        self.symbol = symbol
+        self.neighbors = None
+        self.traversed = False
+        self.can_north = False
+        self.can_east = False
+        self.can_south = False
+        self.can_west = False
+        self.steps = 0
+        self.parent = None
+        self.valid_directions()
+
+    def valid_directions(self):
+        match self.symbol:
+            case "|":
+                self.can_north = True
+                self.can_south = True
+            case "-":
+                self.can_east = True
+                self.can_west = True
+            case "L":
+                self.can_north = True
+                self.can_east = True
+            case "J":
+                self.can_north = True
+                self.can_west = True
+            case "7":
+                self.can_west = True
+                self.can_south = True
+            case "F":
+                self.can_south = True
+                self.can_east = True
+            case ".":
+                pass
+        return
+
+    def print(self):
+        print(f"Symbol: {self.symbol}\tNeighbors: {self.neighbors}\tTraversed: {self.traversed}")
+
+class Traverser:
+    def __init__(self):
+        self.map = None
+        self.start = None
+        self.stack = []
+    
+    def traverse(self, start):
+        self.stack.append(start)
+        max_steps = 0
+        while(True):
+            if(len(self.stack) == 0):
+                return max_steps 
+            steps = self.take_step(self.stack[-1], self.stack[-1].steps+1)
+            if(steps > max_steps):
+                max_steps = steps
+
+    def take_step(self, cell, steps):
+        still_good = False
+        cell.traversed = True
+        for next_cell in cell.neighbors:
+            if(next_cell is not None and not next_cell.traversed):
+                next_cell.steps = steps
+                self.stack.append(next_cell)
+                still_good = True
+        if(not still_good):
+            self.stack.pop()
+        return steps
+
+def traverse(map, cell, count):
+    cell.traversed = True
+    cell.steps = count
+    map.print()
+    for next_cell in cell.neighbors:
+        if(next_cell is not None and not next_cell.traversed):
+            return traverse(map, next_cell, count+1)
+    return count
+
+if __name__ == "__main__":
+    m = Map(final_input())
+
+    t = Traverser()
+    max_distance = t.traverse(m.start)
+
+    m.print()
+
+    if(max_distance % 2 == 1):
+        max_distance = max_distance / 2 + 1
+    else:
+        max_distance /= 2
+
+    print(round(max_distance))
