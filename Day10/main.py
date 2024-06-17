@@ -146,11 +146,15 @@ LF7.||||.|7..L||J|7FJ|.|JFL.LJFFFJ7JJ.L|L-L-J-F7J7F|F7-7|FF-|-|-7||.J.FJ|LJ.FLJJ
 7JL|--JLL7.F-JJ.--|L--.|7-J.-JJJ.F---7-F-JL.J.L|-J-LJL-J-JLJ7..L|..L7-LL|----7J.LLJJ-LL-|.LFL7----J-LJL-FL-L-J|JJF-F|LJ7-JLLLJ-L.|JLJ.L|-LL.""".split("\n")
 
 def test_input():
-    return """..F7.
-.FJ|.
-SJ.L7
-|F--J
-LJ...""".split("\n")
+    return """...........
+.S-------7.
+.|F-----7|.
+.||.....||.
+.||.....||.
+.|L-7.F-J|.
+.|..|.|..|.
+.L--J.L--J.
+...........""".split("\n")
 
 class DIR(Enum):
     NORTH = 0
@@ -158,6 +162,7 @@ class DIR(Enum):
     SOUTH = 2
     WEST = 3
 
+# Custom map populated with instances of the cell class
 class Map:
     def __init__(self, map):
         self.map = self.generate_cells(map)
@@ -172,6 +177,7 @@ class Map:
                 formatted[row_num].append(Cell(symbol))
         return formatted
     
+    # Generate each cell's list of traversable neighbors
     def create_links(self):
         for row, cells in enumerate(self.map):
             north = east = south = west = None
@@ -211,6 +217,7 @@ class Map:
                     pass
                 cell.neighbors = [north, east, south, west]
 
+    # find the starting cell from the map of cells
     def find_start(self):
         for row in self.map:
             for cell in row:
@@ -221,6 +228,7 @@ class Map:
                     cell.can_west = True
                     return cell
             
+    # custom print function to view helpful data
     def print(self):
         for row in self.map:
             rowstr = ""
@@ -233,6 +241,7 @@ class Map:
             print(f"{rowstr}")
         print("\n") 
 
+# Main cell class, which keeps track of traversable neighbors as well as its distance from start
 class Cell:
     def __init__(self, symbol):
         self.symbol = symbol
@@ -246,6 +255,7 @@ class Cell:
         self.parent = None
         self.valid_directions()
 
+    # determine which directions you can traverse from the cell given its symbol
     def valid_directions(self):
         match self.symbol:
             case "|":
@@ -270,15 +280,18 @@ class Cell:
                 pass
         return
 
+    # custom print function to display helpful data
     def print(self):
         print(f"Symbol: {self.symbol}\tNeighbors: {self.neighbors}\tTraversed: {self.traversed}")
 
+# Main traverser class to find the path to the farthest point in the map
 class Traverser:
     def __init__(self):
         self.map = None
         self.start = None
         self.stack = []
     
+    # the main traverse function. no need to pass the map as the cells have all the needed data, map never modified, cells are changed
     def traverse(self, start):
         self.stack.append(start)
         max_steps = 0
@@ -289,33 +302,30 @@ class Traverser:
             if(steps > max_steps):
                 max_steps = steps
 
+    # function call to avoid maximum recursion depth being breached
+    # this is the function that moves to the next possible cell in the map 
     def take_step(self, cell, steps):
         still_good = False
+        # mark cell as traversed, this way it will never be added again
         cell.traversed = True
         for next_cell in cell.neighbors:
             if(next_cell is not None and not next_cell.traversed):
+                # append all next next to traverse cells
                 next_cell.steps = steps
                 self.stack.append(next_cell)
                 still_good = True
+        # Cell has been fully explored, pop from the lifo queue
         if(not still_good):
             self.stack.pop()
         return steps
 
-def traverse(map, cell, count):
-    cell.traversed = True
-    cell.steps = count
-    map.print()
-    for next_cell in cell.neighbors:
-        if(next_cell is not None and not next_cell.traversed):
-            return traverse(map, next_cell, count+1)
-    return count
-
 if __name__ == "__main__":
-    m = Map(final_input())
+    m = Map(test_input())
 
     t = Traverser()
     max_distance = t.traverse(m.start)
 
+    # print the final map
     m.print()
 
     if(max_distance % 2 == 1):
