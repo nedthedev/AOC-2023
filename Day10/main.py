@@ -181,7 +181,6 @@ class Map:
     def create_links(self):
         for row, cells in enumerate(self.map):
             north = east = south = west = None
-
             for col, cell in enumerate(cells):
                 north = None
                 east = None
@@ -320,7 +319,7 @@ class Traverser:
         return steps
 
 if __name__ == "__main__":
-    m = Map(test_input())
+    m = Map(final_input())
 
     t = Traverser()
     max_distance = t.traverse(m.start)

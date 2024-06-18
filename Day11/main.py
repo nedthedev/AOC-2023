@@ -156,9 +156,10 @@ def test_input():
 
 class Grid:
     def __init__(self, data):
-        self.grid = self.build_grid(data)
+        self.grid = self.grid_to_cells(self.expand_space(data))
+        self.galaxies = self.find_galaxies()
 
-    def build_grid(self, data):
+    def expand_space(self, data):
         for row_count, row in enumerate(data):
             if '#' not in row:
                 data = data[:row_count+1] + ["." * len(row)] + data[row_count+1:]
@@ -171,29 +172,92 @@ class Grid:
                     break
             if(empty):
                 columns_to_dup.append(col)
-                print(f"{col} is empty")
-        for col in columns_to_dup:
+        for added, col in enumerate(columns_to_dup):
             for row_num in range(len(data)):
-                data[row_num] = data[row_num][:col-1] + "." + data[row_num][col-1:]
+                data[row_num] = data[row_num][:col+added+1] + "." + data[row_num][col+added+1:]
         return data
     
-    def print(self):
-        for row in self.grid:
-            print(row)
+    def print(self, grid=None):
+        for y, row in enumerate(self.grid):
+            string = ""
+            for x in range(len(row)):
+                string += str(self.grid[y][x].weight) + "\t"
+            print(string)
+
+    def grid_to_cells(self, grid):
+        cell_grid = []
+        for y, row in enumerate(grid):
+            cell_grid.append([])
+            for x in range(len(row)):
+                cell_grid[y].append(Node((x, y), grid[y][x]))
+        return cell_grid
+
+    def link_cell_neighbors(self):
+        for row, cells in enumerate(self.grid):
+            for col in range(len(cells)):
+                north = east = south = west = None
+                try:
+                    if(row-1 >= 0): 
+                        north = self.grid[row-1][col]
+                except: pass
+                try: east = self.grid[row][col+1]
+                except: pass
+                try: south = self.grid[row+1][col]
+                except: pass
+                try: 
+                    if(col-1 >= 0):
+                        west = self.grid[row][col-1]
+                except: pass
+                self.grid[row][col].neighbors = (north, east, south, west)
+
+    def find_galaxies(self):
+        galaxies = []
+        for y, row in enumerate(self.grid):
+            for x in range(len(row)):
+                if(self.grid[y][x].symbol == "#"):
+                    self.grid[y][x] = Galaxy(self.grid[y][x])
+                    galaxies.append(self.grid[y][x])
+        return galaxies
 
 class Node:
-    def __init__(self):
-        pass
+    def __init__(self, coord, symbol, cost=1):
+        self.coord = coord
+        self.symbol = symbol
+        self.cost = cost
+        self.weight = 8192
+        self.traversed = False
+        self.distance_map = []
+        self.neighbors = []
 
-# class which runs Djikstra's algorithm from the given node
-class Traverse:
-    def __init__(self):
-        pass
+    def print(self):
+        print(f"Location: {self.coord}\tSymbol: {self.symbol}\tNeighbors: {self.neighbors}")
 
-    def djikstra(self, node):
-        pass
+class Galaxy(Node):
+
+    def __init__(self, node):
+        super().__init__(node.coord, node.symbol, node.weight)
+        self.grid = []
+
+    def calculate_distances(self, grid):
+        # self.grid = grid.grid.copy() # create a copy of the star map
+        self.grid = grid
+
+        stack = [] # stack to act as queue
+        step = 1
+        for node in self.neighbors:
+            if(node):
+                if step < node.weight:
+                    node.weight = step
+
+        self.grid.print()
 
 if __name__ == "__main__":
     g = Grid(test_input())
+
+    # untouched = g.grid.copy()
+    for galaxy in g.galaxies:
+        galaxy.weight = 0
+        galaxy.calculate_distances(g)
+    # g.grid = untouched
+
     g.print()
-    t = Traverse()
