@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import time
+
 def final_input():
     return """....................#........#...............................#............................................................#................#
 ............#...................................#........................................#........#..................#...........#..........
@@ -157,6 +159,7 @@ def test_input():
 class Grid:
     def __init__(self, data):
         self.grid = self.grid_to_cells(self.expand_space(data))
+        self.link_cell_neighbors()
         self.galaxies = self.find_galaxies()
 
     def expand_space(self, data):
@@ -191,23 +194,22 @@ class Grid:
             for x in range(len(row)):
                 cell_grid[y].append(Node((x, y), grid[y][x]))
         return cell_grid
+    
+    def reset(self):
+        for row, cells in enumerate(self.grid):
+            for col in range(len(cells)):
+                self.grid[row][col].reset()
 
     def link_cell_neighbors(self):
         for row, cells in enumerate(self.grid):
             for col in range(len(cells)):
                 north = east = south = west = None
-                try:
-                    if(row-1 >= 0): 
-                        north = self.grid[row-1][col]
-                except: pass
+                if(row-1 >= 0): north = self.grid[row-1][col]
                 try: east = self.grid[row][col+1]
                 except: pass
                 try: south = self.grid[row+1][col]
                 except: pass
-                try: 
-                    if(col-1 >= 0):
-                        west = self.grid[row][col-1]
-                except: pass
+                if(col-1 >= 0): west = self.grid[row][col-1]
                 self.grid[row][col].neighbors = (north, east, south, west)
 
     def find_galaxies(self):
@@ -215,7 +217,7 @@ class Grid:
         for y, row in enumerate(self.grid):
             for x in range(len(row)):
                 if(self.grid[y][x].symbol == "#"):
-                    self.grid[y][x] = Galaxy(self.grid[y][x])
+                    # self.grid[y][x] = Galaxy(self.grid[y][x])
                     galaxies.append(self.grid[y][x])
         return galaxies
 
@@ -229,35 +231,54 @@ class Node:
         self.distance_map = []
         self.neighbors = []
 
+    def calculate_distances(self, grid):
+        # self.grid = grid.grid.copy() # create a copy of the star map
+        # self.grid = grid
+
+        stack = [self] # stack to act as queue
+        while(len(stack) > 0):
+            for node in stack[0].neighbors:
+                if(node and stack[0].weight+1 < node.weight):
+                    node.weight = stack[0].weight+1
+                    stack.append(node)
+            stack = stack[1:]
+
+    def reset(self):
+        self.weight = 8192
+
     def print(self):
         print(f"Location: {self.coord}\tSymbol: {self.symbol}\tNeighbors: {self.neighbors}")
 
-class Galaxy(Node):
+# class Galaxy(Node):
 
-    def __init__(self, node):
-        super().__init__(node.coord, node.symbol, node.weight)
-        self.grid = []
+#     def __init__(self, node):
+#         super().__init__(node.coord, node.symbol, node.weight)
+#         self.neighbors = node.neighbors
+#         self.grid = []
 
-    def calculate_distances(self, grid):
-        # self.grid = grid.grid.copy() # create a copy of the star map
-        self.grid = grid
+#     def calculate_distances(self, grid):
+#         # self.grid = grid.grid.copy() # create a copy of the star map
+#         # self.grid = grid
 
-        stack = [] # stack to act as queue
-        step = 1
-        for node in self.neighbors:
-            if(node):
-                if step < node.weight:
-                    node.weight = step
-
-        self.grid.print()
+#         stack = [self] # stack to act as queue
+#         while(len(stack) > 0):
+#             for node in stack[0].neighbors:
+#                 if(node and stack[0].weight+1 < node.weight):
+#                     node.weight = stack[0].weight+1
+#                     stack.append(node)
+#             stack = stack[1:]
+#             grid.print()
+#             time.sleep(.1)
 
 if __name__ == "__main__":
     g = Grid(test_input())
 
-    # untouched = g.grid.copy()
-    for galaxy in g.galaxies:
+    sum = 0
+    for index, galaxy in enumerate(g.galaxies):
         galaxy.weight = 0
         galaxy.calculate_distances(g)
-    # g.grid = untouched
-
-    g.print()
+        for destination in g.galaxies[index+1:]:
+            sum += destination.weight
+        g.print()
+        g.reset()
+    print(sum)
