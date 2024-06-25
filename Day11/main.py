@@ -145,46 +145,55 @@ def final_input():
 ..............#......................#.......#.........................................................................#....................""".split("\n")
 
 def test_input():
-    return """...#......
-.......#..
-#.........
-..........
-......#...
-.#........
-.........#
-..........
-.......#..
-#...#.....""".split("\n")
+    return """.....#......
+.........#..
+#...........
+............
+........#...
+.#..........
+...........#
+............
+.........#..
+#.....#.....""".split("\n")
 
 class Grid:
     def __init__(self, data):
-        self.grid = self.grid_to_cells(self.expand_space(data))
+        self.grid = self.grid_to_cells(data)
+        self.grid = self.expand_space()
         self.link_cell_neighbors()
         self.galaxies = self.find_galaxies()
 
-    def expand_space(self, data):
-        for row_count, row in enumerate(data):
+    def expand_space(self):
+        for row_count, row in enumerate(self.grid):
             if '#' not in row:
-                data = data[:row_count+1] + ["." * len(row)] + data[row_count+1:]
+                for cell in row:
+                    cell.cost = 2
         columns_to_dup = []
-        for col in range(len(data[0])):
+        for col in range(len(self.grid[0])):
             empty = True
-            for row in range(len(data)):
-                if(data[row][col] == "#"):
+            for row in range(len(self.grid)):
+                if(self.grid[row][col] == "#"):
                     empty = False
                     break
             if(empty):
                 columns_to_dup.append(col)
         for added, col in enumerate(columns_to_dup):
-            for row_num in range(len(data)):
-                data[row_num] = data[row_num][:col+added+1] + "." + data[row_num][col+added+1:]
-        return data
+            for row_num in range(len(self.grid)):
+                self.grid[row_num][col].cost = 2
+                self.grid[row_num][col].print()
+        return self.grid
     
     def print(self, grid=None):
-        for y, row in enumerate(self.grid):
+        if(not grid):
+            grid = self.grid
+        for y, row in enumerate(grid):
             string = ""
             for x in range(len(row)):
-                string += str(self.grid[y][x].weight) + "\t"
+                # if(self.grid[y][x].symbol == "#"):
+                string += str(self.grid[y][x].weight)
+                # else:
+                # string += grid[y][x].symbol
+                # string += "\t"
             print(string)
 
     def grid_to_cells(self, grid):
@@ -200,15 +209,21 @@ class Grid:
             for col in range(len(cells)):
                 self.grid[row][col].reset()
 
+    def mark_path(self, start, dest):
+        dest.symbol = 'D'
+        next = dest.parent
+        while(next != start):
+            next.symbol = 'x'
+            next = next.parent
+        return
+
     def link_cell_neighbors(self):
         for row, cells in enumerate(self.grid):
             for col in range(len(cells)):
                 north = east = south = west = None
                 if(row-1 >= 0): north = self.grid[row-1][col]
-                try: east = self.grid[row][col+1]
-                except: pass
-                try: south = self.grid[row+1][col]
-                except: pass
+                if(col+1 < len(cells)): east = self.grid[row][col+1]
+                if(row+1 < len(self.grid)): south = self.grid[row+1][col]
                 if(col-1 >= 0): west = self.grid[row][col-1]
                 self.grid[row][col].neighbors = (north, east, south, west)
 
@@ -218,6 +233,7 @@ class Grid:
             for x in range(len(row)):
                 if(self.grid[y][x].symbol == "#"):
                     # self.grid[y][x] = Galaxy(self.grid[y][x])
+                    self.grid[y][x].symbol = str(len(galaxies)+1)
                     galaxies.append(self.grid[y][x])
         return galaxies
 
@@ -226,7 +242,8 @@ class Node:
         self.coord = coord
         self.symbol = symbol
         self.cost = cost
-        self.weight = 8192
+        self.weight = 1
+        self.parent = None
         self.traversed = False
         self.distance_map = []
         self.neighbors = []
@@ -234,20 +251,27 @@ class Node:
     def calculate_distances(self, grid):
         # self.grid = grid.grid.copy() # create a copy of the star map
         # self.grid = grid
+        tmp_grid = grid.grid.copy()
 
         stack = [self] # stack to act as queue
         while(len(stack) > 0):
             for node in stack[0].neighbors:
-                if(node and stack[0].weight+1 < node.weight):
-                    node.weight = stack[0].weight+1
+                if(node and stack[0].weight+node.cost < node.weight):
+                    node = tmp_grid[node.coord[1]][node.coord[0]]
+                    node.weight = stack[0].weight+node.cost
+                    node.parent = stack[0]
                     stack.append(node)
             stack = stack[1:]
+        return tmp_grid
+
+    def get_distance(self, dest):
+        return (abs(self.coord[1] - dest.coord[1]) + abs(self.coord[0] - dest.coord[0]))
 
     def reset(self):
-        self.weight = 8192
+        self.weight = 1
 
     def print(self):
-        print(f"Location: {self.coord}\tSymbol: {self.symbol}\tNeighbors: {self.neighbors}")
+        print(f"Location: {self.coord}\tSymbol: {self.symbol}\tNeighbors: {self.neighbors}\tCost: {self.cost}")
 
 # class Galaxy(Node):
 
@@ -274,11 +298,20 @@ if __name__ == "__main__":
     g = Grid(test_input())
 
     sum = 0
+    pairs = 0
     for index, galaxy in enumerate(g.galaxies):
         galaxy.weight = 0
-        galaxy.calculate_distances(g)
+        # galaxy.calculate_distances(g)
+        galaxy_sum = 0
         for destination in g.galaxies[index+1:]:
-            sum += destination.weight
+            pairs+=1
+            # print(f"Distance from {galaxy.coord} to {destination.coord} is {destination.weight}")
+            # galaxy_sum += destination.weight
+            galaxy_sum += galaxy.get_distance(destination)
+            # g.mark_path(galaxy, destination)
+        # print(galaxy_sum)
+        sum += galaxy_sum
         g.print()
         g.reset()
+    print(pairs)
     print(sum)
