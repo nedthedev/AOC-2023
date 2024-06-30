@@ -1320,51 +1320,68 @@ FINAL_INPUT = """.#..####..#
 ####.##.######.
 #######..####.."""
 
-def fix_smudge(row1, row2):
-    for index in range(len(row1)):
-        if(row1[index] != row2[index]):
-            fixed1 = row1[:index] + row2[index] + row1[index+1:]
-            print(fixed1 == row2)
-            print(f"{row1} now {fixed1} to match {row2}")
-            if(fixed1 == row2):
-                return True
-    return False
-
-def confirm_hz_fold(map, index):
-    if(index == 0 or index == len(map)-2):
-        return True
-    for offset in range(1, index+1):
-        if(map[index-offset] == map[index+1+offset]):
-            if(index-offset == 0 or index+1+offset == len(map)-1):
-                return index
+def print_map(map, edited):
+    for row in range(len(map)):
+        if(edited and row == edited):
+            print(f"{map[row]}<<<")
         else:
-            # if(fix_smudge(map[index-offset], map[index+1+offset])):
-                # return index
-            return False
+            print(map[row])
+
+def fix_smudge(row1, row2):
+    differences = 0
+    mismatch = None
+    for char in range(len(row1)):
+        if(row1[char] != row2[char]):
+            differences += 1
+            mismatch = char
+    if(differences == 1):
+            fixed1 = row1[:mismatch] + row2[mismatch] + row1[mismatch+1:]
+            # print(fixed1 == row2)
+            # print(f"{row1} now {fixed1} to match {row2}")
+            return fixed1
     return False
 
 # def confirm_hz_fold(map, index):
 #     if(index == 0 or index == len(map)-2):
 #         return True
-#     have_edited = False
 #     for offset in range(1, index+1):
 #         if(map[index-offset] == map[index+1+offset]):
 #             if(index-offset == 0 or index+1+offset == len(map)-1):
-#                 if(have_edited):
-#                     return True
-#                 else:
-#                     return False
+#                 return index
 #         else:
-#             if(fix_smudge(map[index-offset], map[index+1+offset])):
-#                 have_edited = True
-#             else:
-#                 return False
+#             # if(fix_smudge(map[index-offset], map[index+1+offset])):
+#                 # return index
+#             return False
 #     return False
+
+def confirm_hz_fold(map, index, have_edited=False):
+    for offset in range(0, index+1):
+        # print(f"Comparing {index-offset} to {index+1+offset}")
+        if(map[index-offset] != map[index+1+offset]):
+            # print("DONT MATCH")
+            # don't want to fix more than one smudge
+            if(fixed := fix_smudge(map[index-offset], map[index+1+offset]) and not have_edited):
+                print_map(map, fixed)
+                have_edited = True
+            else:
+                return False
+        if(index-offset == 0 or index+1+offset == len(map)-1):
+            # only want results that have been result of a smudge fix
+            if(have_edited):
+                return True
+            else:
+                return False
+    return False
 
 def find_hz_mirror(map):
     for index in range(len(map)-1):
         if(map[index] == map[index+1]):
             if(confirm_hz_fold(map, index)):
+                return index+1
+        elif edited := fix_smudge(map[index], map[index+1]):
+            tmp_map = map[:index] + [edited] + map[index+1:]
+            print_map(tmp_map, index)
+            if confirm_hz_fold(tmp_map, index, True):
                 return index+1
     return 0
 
@@ -1386,6 +1403,5 @@ if __name__ == "__main__":
             value = find_hz_mirror(rotate(map.split("\n")))
         else:
             value *= 100
-        print(value)
         sum += value
     print(f"Final Value: {sum}")
