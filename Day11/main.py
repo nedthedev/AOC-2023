@@ -206,7 +206,7 @@ class Grid:
     
     def reset(self):
         for row, cells in enumerate(self.grid):
-            for col in range(len(cells)):
+            for col in range(len(cells)):   
                 self.grid[row][col].reset()
 
     def mark_path(self, start, dest):
