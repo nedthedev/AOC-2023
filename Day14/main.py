@@ -122,9 +122,38 @@ def roll_north(grid, row, col):
             break
     return grid
 
+def roll_west(grid, row, col):
+    while col > 0:
+        if(grid[row][col-1] == '.'):
+            grid[row] = grid[row][:col-1] + "O." + grid[row][col+1:]
+            col -= 1
+        else:
+            break
+    return grid
+
+def roll_south(grid, row, col):
+    while row < len(grid)-1:
+        if(grid[row+1][col] == '.'):
+            grid[row+1] = grid[row+1][:col] + "O" + grid[row+1][col+1:]
+            grid[row] = grid[row][:col] + "." + grid[row][col+1:]
+            row = row+1
+        else:
+            break
+    return grid
+
+def roll_east(grid, row, col):
+    while col < len(grid[0])-1:
+        if(grid[row][col+1] == '.'):
+            grid[row] = grid[row][:col] + ".O" + grid[row][col+2:]
+            col += 1
+        else:
+            break
+    return grid
+
 def print_grid(grid):
     for row in grid:
         print(row)
+    print("\n")
 
 def get_weight(grid):
     weight = 0
@@ -136,11 +165,31 @@ def get_weight(grid):
         factor -= 1
     return weight
 
-if __name__ == "__main__":
-    grid = FINAL_INPUT
+def run_cycle(grid):
     for row in range(len(grid)):
         for col in range(len(grid[0])):
             if grid[row][col] == "O":
-                roll_north(grid, row, col)
+                grid = roll_north(grid, row, col)
+    for row in range(len(grid)):
+        for col in range(len(grid[0])):
+            if grid[row][col] == "O":
+                grid = roll_west(grid, row, col)
+    for row in range(len(grid)-1, -1, -1):
+        for col in range(len(grid[0])):
+            if grid[row][col] == "O":
+                grid = roll_south(grid, row, col)
+    for row in range(len(grid)):
+        for col in range(len(grid[0])-1, -1, -1):
+            if grid[row][col] == "O":
+                grid = roll_east(grid, row, col)
+    return grid
+
+if __name__ == "__main__":
+    grid = FINAL_INPUT
+    # print_grid(grid)
+    for cycles in range(1000):
+        # if cycles % 100 == 0:
+        #     print_grid(grid)
+        grid = run_cycle(grid)
     print_grid(grid)
     print(get_weight(grid))
