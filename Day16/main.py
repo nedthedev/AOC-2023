@@ -130,6 +130,7 @@ class Beam:
     def __init__(self, location, direction, grid):
         self.direction = direction
         self.start = location
+        self.start['direction'] = [direction]
         self.location = None
         self.grid = grid
         self.path = [location]
@@ -140,19 +141,18 @@ class Beam:
         while(len(self.queue) > 0):
             # print(self.queue)
             self.location = self.queue.pop()
-            if(self.location['energized']):
-                print(self.location)
             # print(self.location['row'], self.location['col'])
             if not self.location['energized']:
                 self.location['energized'] = True
                 self.location['step'] = str(self.energized)
                 self.energized += 1
-            self.direction = self.location['direction']
-            match self.direction:
-                case "n": self.go_north(),
-                case "e": self.go_east(),
-                case "s": self.go_south(),
-                case "w": self.go_west(),
+            for dir in self.location['direction']:
+                self.direction = dir
+                match self.direction:
+                    case "n": self.go_north(),
+                    case "e": self.go_east(),
+                    case "s": self.go_south(),
+                    case "w": self.go_west(),
             # time.sleep(.5)
             # print_grid(self.grid)
 
@@ -161,30 +161,30 @@ class Beam:
                 case '-':
                     if(self.location['col']+1 < len(self.grid[0])):
                         if not self.location['gone_east']:
-                            self.grid[self.location['row']][self.location['col']+1]['direction'] = 'e'
+                            self.grid[self.location['row']][self.location['col']+1]['direction'].append('e')
                             self.queue.append(self.grid[self.location['row']][self.location['col']+1])
                             self.location['gone_east'] = True
                     if(self.location['col']-1 >= 0):
                         if not self.location['gone_west']:
-                            self.grid[self.location['row']][self.location['col']-1]['direction'] = 'w'
+                            self.grid[self.location['row']][self.location['col']-1]['direction'].append('w')
                             self.queue.append(self.grid[self.location['row']][self.location['col']-1])
                             self.location['gone_west'] = True
                 case '\\':
                     if not self.location['gone_west']:
                         if(self.location['col']-1 < len(self.grid[0])):
-                            self.grid[self.location['row']][self.location['col']-1]['direction'] = 'w'
+                            self.grid[self.location['row']][self.location['col']-1]['direction'].append('w')
                             self.queue.append(self.grid[self.location['row']][self.location['col']-1])
                             self.location['gone_west'] = True
                 case '/':
                     if not self.location['gone_east']:
                         if(self.location['col']+1 < len(self.grid[0])):
-                            self.grid[self.location['row']][self.location['col']+1]['direction'] = 'e'
+                            self.grid[self.location['row']][self.location['col']+1]['direction'].append('e')
                             self.queue.append(self.grid[self.location['row']][self.location['col']+1])
                             self.location['gone_east'] = True
                 case _:
                     if not self.location['gone_north']:
                         if(self.location['row']-1 >= 0):
-                            self.grid[self.location['row']-1][self.location['col']]['direction'] = 'n'
+                            self.grid[self.location['row']-1][self.location['col']]['direction'].append('n')
                             self.queue.append(self.grid[self.location['row']-1][self.location['col']])
                             self.location['gone_north'] = True
 
@@ -193,30 +193,30 @@ class Beam:
                 case '|':
                     if(self.location['row']+1 < len(self.grid)):
                         if not self.location['gone_south']:
-                            self.grid[self.location['row']+1][self.location['col']]['direction'] = 's'
+                            self.grid[self.location['row']+1][self.location['col']]['direction'].append('s')
                             self.queue.append(self.grid[self.location['row']+1][self.location['col']])
                             self.location['gone_south'] = True
                     if(self.location['row']-1 >= 0):
                         if not self.location['gone_north']:
-                            self.grid[self.location['row']-1][self.location['col']]['direction'] = 'n'
+                            self.grid[self.location['row']-1][self.location['col']]['direction'].append('n')
                             self.queue.append(self.grid[self.location['row']-1][self.location['col']])
                             self.location['gone_north'] = True
                 case '\\':
                     if not self.location['gone_south']:
                         if(self.location['row']+1 < len(self.grid)):
-                            self.grid[self.location['row']+1][self.location['col']]['direction'] = 's'
+                            self.grid[self.location['row']+1][self.location['col']]['direction'].append('s')
                             self.queue.append(self.grid[self.location['row']+1][self.location['col']])
                             self.location['gone_south'] = True
                 case '/':
                     if not self.location['gone_north']:
                         if(self.location['row']-1 >= 0):
-                            self.grid[self.location['row']-1][self.location['col']]['direction'] = 'n'
+                            self.grid[self.location['row']-1][self.location['col']]['direction'].append('n')
                             self.queue.append(self.grid[self.location['row']-1][self.location['col']])
                             self.location['gone_north'] = True
                 case _:
                     if not self.location['gone_east']:
                         if(self.location['col']+1 < len(self.grid[0])):
-                            self.grid[self.location['row']][self.location['col']+1]['direction'] = 'e'
+                            self.grid[self.location['row']][self.location['col']+1]['direction'].append('e')
                             self.queue.append(self.grid[self.location['row']][self.location['col']+1])
                             self.location['gone_east'] = True
 
@@ -225,30 +225,30 @@ class Beam:
                 case '-':
                     if(self.location['col']+1 < len(self.grid[0])):
                         if not self.location['gone_east']:
-                            self.grid[self.location['row']][self.location['col']+1]['direction'] = 'e'
+                            self.grid[self.location['row']][self.location['col']+1]['direction'].append('e')
                             self.queue.append(self.grid[self.location['row']][self.location['col']+1])
                             self.location['gone_east'] = True
                     if(self.location['col']-1 >= 0):
                         if not self.location['gone_west']:
-                            self.grid[self.location['row']][self.location['col']-1]['direction'] = 'w'
+                            self.grid[self.location['row']][self.location['col']-1]['direction'].append('w')
                             self.queue.append(self.grid[self.location['row']][self.location['col']-1])
                             self.location['gone_west'] = True
                 case '\\':
                     if not self.location['gone_east']:
                         if(self.location['col']+1 < len(self.grid[0])):
-                            self.grid[self.location['row']][self.location['col']+1]['direction'] = 'e'
+                            self.grid[self.location['row']][self.location['col']+1]['direction'].append('e')
                             self.queue.append(self.grid[self.location['row']][self.location['col']+1])
                             self.location['gone_east'] = True
                 case '/':
                     if not self.location['gone_west']:
                         if(self.location['col']-1 >= 0):
-                            self.grid[self.location['row']][self.location['col']-1]['direction'] = 'w'
+                            self.grid[self.location['row']][self.location['col']-1]['direction'].append('w')
                             self.queue.append(self.grid[self.location['row']][self.location['col']-1])
                             self.location['gone_west'] = True
                 case _:
                     if not self.location['gone_south']:
                         if(self.location['row']+1 < len(self.grid)):
-                            self.grid[self.location['row']+1][self.location['col']]['direction'] = 's'
+                            self.grid[self.location['row']+1][self.location['col']]['direction'].append('s')
                             self.queue.append(self.grid[self.location['row']+1][self.location['col']])
                             self.location['gone_south'] = True
 
@@ -257,30 +257,30 @@ class Beam:
                 case '|':
                     if(self.location['row']+1 < len(self.grid)):
                         if not self.location['gone_south']:
-                            self.grid[self.location['row']+1][self.location['col']]['direction'] = 's'
+                            self.grid[self.location['row']+1][self.location['col']]['direction'].append('s')
                             self.queue.append(self.grid[self.location['row']+1][self.location['col']])
                             self.location['gone_south'] = True
                     if(self.location['row']-1 >= 0):
                         if not self.location['gone_north']:
-                            self.grid[self.location['row']-1][self.location['col']]['direction'] = 'n'
+                            self.grid[self.location['row']-1][self.location['col']]['direction'].append('n')
                             self.queue.append(self.grid[self.location['row']-1][self.location['col']])
                             self.location['gone_north'] = True
                 case '\\':
                     if not self.location['gone_north']:
                         if(self.location['row']-1 < len(self.grid)):
-                            self.grid[self.location['row']-1][self.location['col']]['direction'] = 'n'
+                            self.grid[self.location['row']-1][self.location['col']]['direction'].append('n')
                             self.queue.append(self.grid[self.location['row']-1][self.location['col']])
                             self.location['gone_north'] = True
                 case '/':
                     if not self.location['gone_south']:
                         if(self.location['row']+1 < len(self.grid)):
-                            self.grid[self.location['row']+1][self.location['col']]['direction'] = 's'
+                            self.grid[self.location['row']+1][self.location['col']]['direction'].append('s')
                             self.queue.append(self.grid[self.location['row']+1][self.location['col']])
                             self.location['gone_south'] = True
                 case _:
                     if not self.location['gone_west']:
                         if(self.location['col']-1 >= 0):
-                            self.grid[self.location['row']][self.location['col']-1]['direction'] = 'w'
+                            self.grid[self.location['row']][self.location['col']-1]['direction'].append('w')
                             self.queue.append(self.grid[self.location['row']][self.location['col']-1])
                             self.location['gone_west'] = True
 
@@ -289,7 +289,7 @@ def generate_cells(grid):
     for row in range(len(grid)):
         new_grid.append([])
         for col in range(len(grid[0])):
-            new_grid[row].append({"symbol": grid[row][col], "energized": False, "step": 0, "row": row, "col": col, "direction": None, "gone_east": False, "gone_north": False, "gone_south": False, "gone_west": False})
+            new_grid[row].append({"symbol": grid[row][col], "energized": False, "step": 0, "row": row, "col": col, "direction": [None], "gone_east": False, "gone_north": False, "gone_south": False, "gone_west": False})
     return new_grid
 
 def print_grid(grid):
@@ -314,9 +314,28 @@ def print_grid(grid):
     print()
 
 if __name__ == "__main__":
-    grid = generate_cells(FINAL_INPUT)
-    grid[0][0]['direction'] = "e"
-    b = Beam(grid[0][0], 'e', grid)
-    b.travel()
-    print_grid(b.grid)
-    print(b.energized)
+    dir = 's'
+    input = FINAL_INPUT
+    optimal = 0
+    for row in range(0, -2, -1):
+        grid = generate_cells(input)
+        for col in range(len(grid[0])):
+            grid[row][col]['direction'] = [dir]
+            b = Beam(grid[row][col], dir, grid)
+            b.travel()
+            if(b.energized > optimal):
+                optimal = b.energized
+            grid = generate_cells(input)
+        dir = 'n'
+    dir = 'e'
+    for col in range(0, -2, -1):
+        grid = generate_cells(input)
+        for row in range(len(grid)):
+            grid[row][col]['direction'] = [dir]
+            b = Beam(grid[row][col], dir, grid)
+            b.travel()
+            if(b.energized > optimal):
+                optimal = b.energized
+            grid = generate_cells(input)
+        dir = 'w'
+    print(optimal)
