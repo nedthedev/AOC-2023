@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from random import randrange
+
 FINAL_INPUT = """145252442331211155222424236242365444543645635235263636335736365356746366644447336554353563345665632525253546422366223363656565532234321555355
 522215435215452265232324235345243632455542526545463655474773777444364534335746445366547435436764665263646344324364254333325655244343525322431
 524242255113544455422566443565622262556356547455544657646573446646476763543566735465733355534457464656646562423535436246456664262133415344423
@@ -201,55 +203,56 @@ def print_grid(grid):
             # row_str += str(grid[row][col].direction)
             # row_str += str(grid[row][col].weight) + "\t"
             if(grid[row][col].on_path):
-                if(cell.direction == 'n'):
-                    row_str += '^'
-                elif(cell.direction == "e"):
-                    row_str += ">"
-                elif(cell.direction == "s"):
-                    row_str += "V"
-                elif(cell.direction == "w"):
-                    row_str += "<"
-                # row_str += "X"
+                # if(cell.direction == 'n'):
+                #     row_str += '^'
+                # elif(cell.direction == "e"):
+                #     row_str += ">"
+                # elif(cell.direction == "s"):
+                #     row_str += "V"
+                # elif(cell.direction == "w"):
+                #     row_str += "<"
+                row_str += grid[row][col].direction
             else:
                 row_str += "-"
         print(row_str)
     print()
 
-def check_chain(cell, dir):
-    valid = True
+def check_chain(cell):
     if(cell.parent and cell.parent.parent and cell.parent.parent.parent):
-        if(cell.parent.direction == dir and cell.parent.parent.direction == dir and cell.parent.parent.parent.direction == dir):
-            valid = False
-    return valid
+        if((cell.parent.row == cell.row and cell.parent.parent.row == cell.row and cell.parent.parent.parent.row == cell.row) or (cell.parent.col == cell.col and cell.parent.parent.col == cell.col and cell.parent.parent.parent.col == cell.col)):
+            return False
+    return True
 
 def djikstras(start):
     start.weight = start.cost
     start.on_path = True
     start.direction = 'e'
     queue = [start]
-    count = 0
     directions = ['n', 'e', 's', 'w']
     while(len(queue) > 0):
-        # if(count % 25 == 0):
-        #     print(len(queue))
         cell = queue.pop()
         for index, neighbor in enumerate(cell.neighbors):
             if(neighbor):
-                direction = directions[index]
                 total_cost = cell.weight + neighbor.cost
-                if(check_chain(cell, directions[index]) and total_cost < neighbor.weight):
+                if(check_chain(cell) and total_cost < neighbor.weight):
                     neighbor.weight = total_cost
-                    neighbor.direction = direction
-                    # cell.direction = direction
-                    print(direction)
+                    neighbor.direction = directions[index]
+                    cell.direction = neighbor.direction
                     queue.append(neighbor)
                     neighbor.parent = cell
                     cell.child = neighbor
                 cell.explored = True
-                count += 1
         # queue = []
 
 if __name__ == "__main__":
+
+    # grid = ""
+    # for row in range(10):
+    #     row_str = ""
+    #     for col in range(10):
+    #         row_str += str(randrange(10))
+    #     grid += row_str
+
     grid = link_neighbors(gen_grid(TEST_INPUT))
     start = grid[0][0]
     end = grid[len(grid)-1][len(grid[0])-1]

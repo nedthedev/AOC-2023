@@ -241,7 +241,8 @@ humidity-to-location map:
 873607513 1050254626 22771570
 968038003 1911817624 135403149
 2087721389 2835070776 93923407
-1382789085 946284271 103970355"""
+1382789085 946284271 103970355
+""".split("\n")
 
 TEST_INPUT = """seeds: 79 14 55 13
 
@@ -275,7 +276,42 @@ temperature-to-humidity map:
 
 humidity-to-location map:
 60 56 37
-56 93 4"""
+56 93 4
+""".split("\n")
+
+def translate(seed, dest, source, offset):
+    if(seed >= source and seed <= source+offset):
+        return int(seed+(dest-source))
+    return seed
 
 if __name__ == "__main__":
-    pass
+
+    INPUT = TEST_INPUT
+
+    seeds = INPUT[0].split(" ")[1:]
+    maps = []
+    table = {}
+
+    response = 6854775807
+    best_seed = 0
+    for i in range(0, len(seeds), 2):
+        for seed in range(int(seeds[i]), int(seeds[i])+int(seeds[i+1])):
+            original = seed
+            seed = int(seed)
+            mapped = False
+            for line in INPUT[3:]:
+                line = line.split(" ")
+                if(len(line) == 3):
+                    if(not mapped):
+                        translation = translate(seed, int(line[0]), int(line[1]), int(line[2]))
+                        if(seed != translation):
+                            mapped = True
+                            seed = translation
+                else:
+                    mapped = False
+            if(seed < response):
+                best_seed = original
+                response = seed
+
+    print(f"Output: {response}, {best_seed}")
+

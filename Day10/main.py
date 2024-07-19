@@ -167,16 +167,48 @@ class Map:
     def __init__(self, map):
         self.map = self.generate_cells(map)
         self.start = self.find_start()
+        self.internal = 0
         self.create_links()
 
     def generate_cells(self, map):
         formatted = []
         for row_num, row in enumerate(map):
             formatted.append([])
-            for symbol in row:
-                formatted[row_num].append(Cell(symbol))
+            for col_num in range(len(row)):
+                formatted[row_num].append(Cell(row[col_num], row_num, col_num))
         return formatted
     
+    # if border, then check right until there isn't a border. how many borders were there? an odd number, good. even? bad
+    def flood(self, grid):
+        internal = 0
+        borders = 0
+        for row in range(len(grid)):
+            for col in range(len(grid[0])-1):
+                if(grid[row][col].traversed):
+                    borders+=1     
+                    if(grid[row][col+1].traversed):
+                        borders+=1
+                    if(borders%2 == 1):
+                        queue = [grid[row][col+1]]
+                        while(len(queue) > 0):
+                            cell = queue.pop()
+                            row = cell.row
+                            col = cell.col
+                            if(row > 0 and not (grid[row-1][col].traversed or grid[row-1][col].flooded)):
+                                queue.append(grid[row-1][col])
+                            if(row < len(grid)-1 and (not grid[row+1][col].traversed or grid[row+1][col].flooded)):
+                                queue.append(grid[row+1][col])
+                            if(col > 0 and not (grid[row][col-1].traversed or grid[row][col-1].flooded)):
+                                queue.append(grid[row][col-1])
+                            if(col < len(grid[row])-1 and not (grid[row][col+1].traversed or grid[row][col+1].flooded)):
+                                queue.append(grid[row][col+1])
+                            cell.flooded = True
+                            internal += 1
+                else:
+                    check_again = col+1
+            check_again = 0
+        return internal
+        
     # Generate each cell's list of traversable neighbors
     def create_links(self):
         for row, cells in enumerate(self.map):
@@ -232,7 +264,7 @@ class Map:
         for row in self.map:
             rowstr = ""
             for cell in row:
-                if(cell.traversed):
+                if(cell.flooded):
                     # rowstr += str(cell.steps)
                     rowstr += "x"
                 else:
@@ -242,10 +274,13 @@ class Map:
 
 # Main cell class, which keeps track of traversable neighbors as well as its distance from start
 class Cell:
-    def __init__(self, symbol):
+    def __init__(self, symbol, row, col):
         self.symbol = symbol
+        self.row = row
+        self.col = col
         self.neighbors = None
         self.traversed = False
+        self.flooded = False
         self.can_north = False
         self.can_east = False
         self.can_south = False
@@ -319,7 +354,7 @@ class Traverser:
         return steps
 
 if __name__ == "__main__":
-    m = Map(final_input())
+    m = Map(test_input())
 
     t = Traverser()
     max_distance = t.traverse(m.start)
@@ -333,3 +368,8 @@ if __name__ == "__main__":
         max_distance /= 2
 
     print(round(max_distance))
+
+    print(m.flood(m.map))
+
+    # print the final map
+    m.print()

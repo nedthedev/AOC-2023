@@ -145,16 +145,18 @@ def final_input():
 ..............#......................#.......#.........................................................................#....................""".split("\n")
 
 def test_input():
-    return """.....#......
-.........#..
-#...........
-............
-........#...
-.#..........
-...........#
-............
-.........#..
-#.....#.....""".split("\n")
+    return """....#........
+.........#...
+#............
+.............
+.............
+........#....
+.#...........
+............#
+.............
+.............
+.........#...
+#....#.......""".split("\n")
 
 class Grid:
     def __init__(self, data):
@@ -164,23 +166,26 @@ class Grid:
         self.galaxies = self.find_galaxies()
 
     def expand_space(self):
-        for row_count, row in enumerate(self.grid):
-            if '#' not in row:
+        for row in self.grid:
+            empty = True
+            for cell in row:
+                if cell.symbol == "#":
+                    empty = False
+            if(empty):
                 for cell in row:
-                    cell.cost = 2
+                    cell.cost *= 2
         columns_to_dup = []
         for col in range(len(self.grid[0])):
             empty = True
             for row in range(len(self.grid)):
-                if(self.grid[row][col] == "#"):
+                if(self.grid[row][col].symbol == "#"):
                     empty = False
-                    break
             if(empty):
                 columns_to_dup.append(col)
-        for added, col in enumerate(columns_to_dup):
+        for col in columns_to_dup:
+            print(col)
             for row_num in range(len(self.grid)):
-                self.grid[row_num][col].cost = 2
-                self.grid[row_num][col].print()
+                self.grid[row_num][col].cost *= 2
         return self.grid
     
     def print(self, grid=None):
@@ -190,11 +195,15 @@ class Grid:
             string = ""
             for x in range(len(row)):
                 # if(self.grid[y][x].symbol == "#"):
-                string += str(self.grid[y][x].weight)
+                # if(self.grid[y][x].on_path):
+                #     string += "X"
                 # else:
-                # string += grid[y][x].symbol
+                #     string += "."
+                # else:
+                string += str(grid[y][x].cost)
                 # string += "\t"
             print(string)
+        print()
 
     def grid_to_cells(self, grid):
         cell_grid = []
@@ -210,19 +219,20 @@ class Grid:
                 self.grid[row][col].reset()
 
     def mark_path(self, start, dest):
-        dest.symbol = 'D'
+        dest.on_path = True
         next = dest.parent
         while(next != start):
-            next.symbol = 'x'
+            next.print()
+            next.on_path = True
             next = next.parent
         return
 
     def link_cell_neighbors(self):
-        for row, cells in enumerate(self.grid):
-            for col in range(len(cells)):
+        for row in range(len(self.grid)):
+            for col in range(len(self.grid[row])):
                 north = east = south = west = None
                 if(row-1 >= 0): north = self.grid[row-1][col]
-                if(col+1 < len(cells)): east = self.grid[row][col+1]
+                if(col+1 < len(self.grid)): east = self.grid[row][col+1]
                 if(row+1 < len(self.grid)): south = self.grid[row+1][col]
                 if(col-1 >= 0): west = self.grid[row][col-1]
                 self.grid[row][col].neighbors = (north, east, south, west)
@@ -233,7 +243,7 @@ class Grid:
             for x in range(len(row)):
                 if(self.grid[y][x].symbol == "#"):
                     # self.grid[y][x] = Galaxy(self.grid[y][x])
-                    self.grid[y][x].symbol = str(len(galaxies)+1)
+                    # self.grid[y][x].symbol = str(len(galaxies)+1)
                     galaxies.append(self.grid[y][x])
         return galaxies
 
@@ -244,6 +254,7 @@ class Node:
         self.cost = cost
         self.weight = 1
         self.parent = None
+        self.on_path = False
         self.traversed = False
         self.distance_map = []
         self.neighbors = []
@@ -265,10 +276,29 @@ class Node:
         return tmp_grid
 
     def get_distance(self, dest):
+        # start.weight = start.cost
+        # start.on_path = True
+        # start.direction = 'e'
+        # queue = [start]
+        # directions = ['n', 'e', 's', 'w']
+        # while(len(queue) > 0):
+        #     cell = queue.pop()
+        #     for index, neighbor in enumerate(cell.neighbors):
+        #         if(neighbor):
+        #             total_cost = cell.weight + neighbor.cost
+        #             if(check_chain(cell) and total_cost < neighbor.weight):
+        #                 neighbor.weight = total_cost
+        #                 neighbor.direction = directions[index]
+        #                 cell.direction = neighbor.direction
+        #                 queue.append(neighbor)
+        #                 neighbor.parent = cell
+        #                 cell.child = neighbor
+        #             cell.explored = True
         return (abs(self.coord[1] - dest.coord[1]) + abs(self.coord[0] - dest.coord[0]))
 
     def reset(self):
-        self.weight = 1
+        # self.weight = 1
+        self.on_path = False
 
     def print(self):
         print(f"Location: {self.coord}\tSymbol: {self.symbol}\tNeighbors: {self.neighbors}\tCost: {self.cost}")
@@ -309,6 +339,7 @@ if __name__ == "__main__":
             # galaxy_sum += destination.weight
             galaxy_sum += galaxy.get_distance(destination)
             # g.mark_path(galaxy, destination)
+            # g.print()
         # print(galaxy_sum)
         sum += galaxy_sum
         g.print()
