@@ -732,12 +732,12 @@ def fix_instructions(instructions):
         instruction = instruction.split(" ")[-1][1:-1]
         dir = directions[int(instruction[-1])]
         distance = int(f'0x{instruction[1:-1]}', 0)
-        fixed.append(f"{dir} {distance//100}")
+        fixed.append(f"{dir} {distance}")
     return fixed
 
 if __name__ == "__main__":
     grid = [["#"]]
-    commands = TEST_INPUT
+    commands = FINAL_INPUT
     # max_width = 1
     # max_height = 1
     # for command in commands:
@@ -755,7 +755,8 @@ if __name__ == "__main__":
 
     max_width = 1
     row = col = 0
-    # commands = fix_instructions(commands)
+    commands = fix_instructions(commands)
+    print(commands)
     for command in commands:
         print(command)
         command = command.split(" ")
