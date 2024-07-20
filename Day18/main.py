@@ -677,7 +677,7 @@ L 3 (#128cf2)
 U 8 (#49dea3)""".split("\n")
 
 def print_grid(grid):
-    # with open("output.txt", "a") as f:
+    # with open(".output.txt", "a") as f:
         for row in grid:
             # print(row, file=f)
             print(row)
@@ -695,16 +695,18 @@ def flood(grid):
                     cell = queue.pop()
                     row = cell[0]
                     col = cell[1]
-                    grid[row][col] = "#"
-                    internal += 1
-                    if(row > 0 and grid[row-1][col] == "."):
-                        queue.append((row-1, col))
-                    if(row < len(grid)-1 and grid[row+1][col] == "."):
-                        queue.append((row+1, col))
-                    if(col > 0 and grid[row][col-1] == "."):
-                        queue.append((row, col-1))
-                    if(col < len(grid[row]) and grid[row][col+1] == "."):
-                        queue.append((row, col+1))
+                    if(grid[row][col] != "#"):
+                        grid[row][col] = "#"
+                        internal += 1
+                        if(row > 0 and grid[row-1][col] == "."):
+                            queue.append((row-1, col))
+                        if(row < len(grid)-1 and grid[row+1][col] == "."):
+                            queue.append((row+1, col))
+                        if(col > 0 and grid[row][col-1] == "."):
+                            queue.append((row, col-1))
+                        if(col < len(grid[row]) and grid[row][col+1] == "."):
+                            queue.append((row, col+1))
+                        print_grid(grid)
             else:
                 break
     return grid
@@ -716,6 +718,22 @@ def count_lava(grid):
             if cell == "#":
                 count += 1
     return count
+
+def prepend(char, row):
+    str = char
+    for c in row:
+        str += c
+    return list(str)
+
+def fix_instructions(instructions):
+    fixed = []
+    directions = ('R', 'D', 'L', 'U')
+    for instruction in instructions:
+        instruction = instruction.split(" ")[-1][1:-1]
+        dir = directions[int(instruction[-1])]
+        distance = int(f'0x{instruction[1:-1]}', 0)
+        fixed.append(f"{dir} {distance//100}")
+    return fixed
 
 if __name__ == "__main__":
     grid = [["#"]]
@@ -735,55 +753,71 @@ if __name__ == "__main__":
     #     for col in range(max_width):
     #         grid[row].append(".")
 
-    row = col = width = height = 0
+    max_width = 1
+    row = col = 0
+    # commands = fix_instructions(commands)
     for command in commands:
+        print(command)
         command = command.split(" ")
         match command[0]:
             case 'U':
                 for r in range(int(command[1])):
                     row-=1
-                    try:
+                    if(row < 0):
+                        grid.insert(0, list("."*col+"#"+'.'*(max_width-col-1)))
+                    else:
                         grid[row][col] = "#"
-                    except Exception:
-                        grid.insert(0, list("."*col+"#"+'.'*(width-col)))
                 if(row < 0):
                     row = 0
             case 'R':
                 for c in range(int(command[1])):
                     col += 1
-                    try:
+                    if(col >= len(grid[row])):
+                        for r in range(len(grid)):
+                            to_append = "."
+                            if(r == row):
+                                to_append = "#"
+                            grid[r].append(to_append)
+                    else:
                         grid[row][col] = "#"
-                    except Exception:
-                        grid[row].append("#")
                 if(col >= len(grid[row])):
                     col = len(grid[row])-1
             case 'D':
-                for r in range(int(command[1])+1):
+                for r in range(int(command[1])):
                     row+=1
-                    try:
+                    if(row >= len(grid)):
+                        new_row = ""
+                        for c in range(max_width):
+                            to_append = "."
+                            if(c == col):
+                                to_append = "#"
+                            new_row += to_append
+                        grid.append(list(new_row))
+                    else:
                         grid[row][col] = "#"
-                    except Exception:
-                        string = "."*(col)+'#'
-                        grid.append(list(string))
                 if(row >= len(grid)):
                     row = len(grid)-1
             case 'L':
                 for c in range(int(command[1])):
                     col-=1
                     if(col < 0):
-                        for index in range(len(grid)):
-                            grid[index].insert(0, ".")
-                    try:
-                        grid[row][col] = "#"
-                    except Exception as e:
-                        grid[row].append("#")
+                        for r in range(len(grid)):
+                            to_append = "."
+                            if(r == row):
+                                to_append = "#"
+                            grid[r] = prepend(to_append, grid[r])
+                    else:
+                        try:
+                            grid[row][col] = "#"
+                        except Exception as e:
+                            grid[row].append("#")
                 if(col < 0):
                     col = 0
-        if(col > width): width = col
-        if(row > height): height = row
+        if(len(grid[row]) > max_width):
+            max_width = len(grid[row])
 
-    print_grid(grid)
+    # print_grid(grid)
     grid = flood(grid)
-    print_grid(grid)
-    # lava_cells = count_lava(grid)
-    # print(lava_cells)
+    # print_grid(grid)
+    lava_cells = count_lava(grid)
+    print(lava_cells)

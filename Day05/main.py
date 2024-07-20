@@ -286,7 +286,7 @@ def translate(seed, dest, source, offset):
 
 if __name__ == "__main__":
 
-    INPUT = TEST_INPUT
+    INPUT = FINAL_INPUT
 
     seeds = INPUT[0].split(" ")[1:]
     maps = []
@@ -295,7 +295,8 @@ if __name__ == "__main__":
     response = 6854775807
     best_seed = 0
     for i in range(0, len(seeds), 2):
-        for seed in range(int(seeds[i]), int(seeds[i])+int(seeds[i+1])):
+        for seed in seeds:
+        # for seed in range(int(seeds[i]), int(seeds[i])+int(seeds[i+1]), 1234):
             original = seed
             seed = int(seed)
             mapped = False
