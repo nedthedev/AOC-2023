@@ -60,9 +60,9 @@ broadcaster -> tf, br, zn, nc
 %lj -> ns""".split("\n")
 
 TEST_INPUT = """broadcaster -> a
-%a -> inv, con
+%a -> inv, con, rx
 &inv -> b
-%b -> con
+%b -> con, c
 &con -> output""".split("\n")
 
 class Signal:
@@ -91,6 +91,8 @@ class Machine:
         self.connections = connections
         self.name = name
         self.signal = False
+        self.low_pulses_received = 0
+        self.high_pulses_received = 0
 
     def receive(self, machine, signal):
         return True
@@ -98,13 +100,17 @@ class Machine:
     def send(self):
         to_send = []
         for machine in self.connections:
-            print(f"Sending {self.signal} from {self.name} -> {machine.name}")
+            # print(f"Sending {self.signal} from {self.name} -> {machine.name}")
             if(machine.receive(self.name, self.signal)):
                 to_send.append(machine)
         return to_send
 
 class Broadcaster(Machine):
     def receive(self, machine, signal):
+        if(signal):
+            self.high_pulses_received += 1
+        else:
+            self.low_pulses_received += 1
         self.signal = signal
         self.name = "broadcaster"
         return True
@@ -158,18 +164,37 @@ def build_machines(data):
     return machines
 
 def link_machines(machines):
+    to_add = {}
     for machine in machines:
         new_links = []
         for connection in machines[machine].connections:
             try:
                 new_links.append(machines[connection])
             except Exception:
-                new_links.append(Broadcaster(connection, []))
+                new_machine = Broadcaster(connection, [])
+                to_add[connection] = new_machine
+                new_links.append(new_machine)
         machines[machine].connections = new_links
+    for name in to_add:
+        machines[name] = to_add[name]
     return machines
 
 if __name__ == "__main__":
     s = Signal(link_machines(build_machines(FINAL_INPUT)), False)
-    for i in range(1000):
+
+    # Part 1
+    # for i in range(1000):
+    #     s.push_button()
+    # print(f"Low Signals: {s.low_sends}\nHigh Signals: {s.high_sends}\nAnswer: {s.high_sends*s.low_sends}")
+
+    # Part 2
+    iterations = 0
+    while(True):
         s.push_button()
-    print(f"Low Signals: {s.low_sends}\nHigh Signals: {s.high_sends}\nAnswer: {s.high_sends*s.low_sends}")
+        iterations += 1
+        if(s.machines['rx'].low_pulses_received == 1):
+            break
+        else:
+            s.machines['rx'].low_pulses_received = 0
+            s.machines['rx'].high_pulses_received = 0
+    print(iterations)
