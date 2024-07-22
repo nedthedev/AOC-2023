@@ -112,7 +112,6 @@ class Broadcaster(Machine):
         else:
             self.low_pulses_received += 1
         self.signal = signal
-        self.name = "broadcaster"
         return True
 
 class FlipFlop(Machine):
