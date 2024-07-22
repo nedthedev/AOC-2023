@@ -106,7 +106,6 @@ class Machine:
 class Broadcaster(Machine):
     def receive(self, machine, signal):
         self.signal = signal
-        self.name = "broadcaster"
         return True
 
 class FlipFlop(Machine):
