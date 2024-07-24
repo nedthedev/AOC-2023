@@ -182,9 +182,9 @@ if __name__ == "__main__":
     s = Signal(link_machines(build_machines(FINAL_INPUT)), False)
 
     # Part 1
-    # for i in range(1000):
-    #     s.push_button()
-    # print(f"Low Signals: {s.low_sends}\nHigh Signals: {s.high_sends}\nAnswer: {s.high_sends*s.low_sends}")
+    for i in range(1000):
+        s.push_button()
+    print(f"Low Signals: {s.low_sends}\nHigh Signals: {s.high_sends}\nAnswer: {s.high_sends*s.low_sends}")
 
     # Part 2
     iterations = 0
